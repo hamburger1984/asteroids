@@ -52,6 +52,7 @@ fn laser_movement(
     }
 }
 
+// TODO from video, switch to leafwing-input-manager, support controllers
 fn player_movement_system(
     mut commands: Commands,
     time: Res<Time>,
@@ -78,11 +79,11 @@ fn player_movement_system(
     let mut rotation_factor = 0.0;
 
     if keyboard_input.pressed(KeyCode::ArrowLeft) {
-        rotation_factor += 1.0;
+        rotation_factor += 0.5;
     }
 
     if keyboard_input.pressed(KeyCode::ArrowRight) {
-        rotation_factor -= 1.0;
+        rotation_factor -= 0.5;
     }
 
     // update the ship rotation around the Z axis
