@@ -23,7 +23,7 @@ impl Plugin for MeteorPlugin {
                 ))
                 .run_if(in_state(GameState::Playing)),
         )
-        .add_event::<MeteorDestroyed>();
+            .add_event::<MeteorDestroyed>();
     }
 }
 
@@ -38,12 +38,14 @@ pub struct MeteorBundle {
     spin: Spin,
     wrapping: WrappingMovement,
 }
+
 #[derive(Component, Clone, Copy)]
 pub enum MeteorType {
     Big,
     Medium,
     Small,
 }
+
 #[derive(Component)]
 pub struct Meteor;
 
@@ -173,6 +175,7 @@ fn sandbox_meteor_destroyed_event_handler(
     images: Res<ImageAssets>,
     mut events: EventReader<MeteorDestroyed>,
     windows: Query<&Window>,
+    active_meteor_types: Query<&MeteorType>,
     sheets: Res<Assets<KenneySpriteSheetAsset>>,
 ) {
     let Ok(window) = windows.get_single() else {
@@ -182,11 +185,15 @@ fn sandbox_meteor_destroyed_event_handler(
     let width = window.resolution.width();
     let height = window.resolution.height();
 
+    let mut existing_big = active_meteor_types.iter().filter(|t| matches!(t, MeteorType::Big)).count();
+    //let existing_mid = active_meteor_types.iter().filter(|t| matches!(t, MeteorType::Medium)).count();
+    //info!("existing_big: {}, existing_mid: {}", existing_big, existing_mid);
+
     let Some(space_sheet) = sheets.get(&images.space_sheet)
-    else {
-        warn!("sandbox_meteor_destroyed_event_handler requires meteor sprites to be loaded");
-        return;
-    };
+        else {
+            warn!("sandbox_meteor_destroyed_event_handler requires meteor sprites to be loaded");
+            return;
+        };
 
     for MeteorDestroyed {
         destroyed_at,
@@ -231,21 +238,47 @@ fn sandbox_meteor_destroyed_event_handler(
                 }
             }
             MeteorType::Small => {
-                // do nothing
-                let mut rng = rand::thread_rng();
-                let x: i32 = rng.gen_range(
-                    (-width as i32 / 2)..(width as i32 / 2),
-                );
-                let y: i32 = rng.gen_range(
-                    (-height as i32 / 2)
-                        ..(height as i32 / 2),
-                );
-                commands.spawn(MeteorBundle::big(
-                    Transform::from_xyz(
-                        x as f32, y as f32, 1.,
-                    ),
-                    space_sheet,
-                ));
+                // TODO: make this level based?
+                if existing_big < 2 {
+                    existing_big += 1;
+
+                    // do nothing
+                    let mut rng = rand::thread_rng();
+
+                    // 0 - top, 1 - right, 2 - bottom, 3 - left
+                    let edge = rng.gen_range(0..4);
+                    let edge_factor = rng.gen_range(-0.5..0.5);
+
+                    let x = match edge {
+                        0 => edge_factor * width,
+                        1 => 0.5 * width,
+                        2 => edge_factor * width,
+                        3 => -0.5 * width,
+                        _ => unreachable!(),
+                    } as i32;
+
+                    let y = match edge {
+                        0 => -0.5 * height,
+                        1 => edge_factor * height,
+                        2 => 0.5 * height,
+                        3 => edge_factor * height,
+                        _ => unreachable!(),
+                    } as i32;
+
+                    //let x: i32 = rng.gen_range(
+                    //    (-width as i32 / 2)..(width as i32 / 2),
+                    //);
+                    //let y: i32 = rng.gen_range(
+                    //    (-height as i32 / 2)
+                    //        ..(height as i32 / 2),
+                    //);
+                    commands.spawn(MeteorBundle::big(
+                        Transform::from_xyz(
+                            x as f32, y as f32, 1.,
+                        ),
+                        space_sheet,
+                    ));
+                }
             }
         }
     }
