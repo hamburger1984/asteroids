@@ -25,16 +25,16 @@ impl PlayerShipType {
     pub fn base_ship_speed(&self) -> BaseShipSpeed {
         match self {
             PlayerShipType::A => BaseShipSpeed {
-                movement_speed: 500.0, // meters per second
-                rotation_speed: f32::to_radians(360.0), /* degrees per second */
+                movement_speed: 600.0, // meters per second
+                rotation_speed: f32::to_radians(450.0), /* degrees per second */
             },
             PlayerShipType::B => BaseShipSpeed {
-                movement_speed: 500.0, // meters per second
-                rotation_speed: f32::to_radians(360.0), /* degrees per second */
+                movement_speed: 600.0, // meters per second
+                rotation_speed: f32::to_radians(450.0), /* degrees per second */
             },
             PlayerShipType::C => BaseShipSpeed {
-                movement_speed: 500.0, // meters per second
-                rotation_speed: f32::to_radians(360.0), /* degrees per second */
+                movement_speed: 600.0, // meters per second
+                rotation_speed: f32::to_radians(450.0), /* degrees per second */
             },
         }
     }
